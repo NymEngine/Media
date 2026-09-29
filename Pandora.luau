@@ -78,10 +78,10 @@ local Library do
         FadeSpeed = 0.4,
 
         Folders = {
-            Directory = "Pandora",
-            Configs = "Pandora/Configs",
-            Assets = "Pandora/Images",
-            Fonts = "Pandora/Fonts"
+            Directory = "uuuhake",
+            Configs = "uuuhake/Configs",
+            Assets = "uuuhake/Images",
+            Fonts = "uuuhake/Fonts"
         },
 
         Images = {
