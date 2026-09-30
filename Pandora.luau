@@ -78,10 +78,10 @@ local Library do
         FadeSpeed = 0.4,
 
         Folders = {
-            Directory = "uuuhake",
-            Configs = "uuuhake/Configs",
-            Assets = "uuuhake/Images",
-            Fonts = "uuuhake/Fonts"
+            Directory = "Bloris",
+            Configs = "Bloris/Configs",
+            Assets = "Bloris/Images",
+            Fonts = "Bloris/Fonts"
         },
 
         Images = {
