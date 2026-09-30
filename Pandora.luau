@@ -640,23 +640,25 @@ local Library do
     -- Custom font
     local CustomFont = { } do
         function CustomFont:New(Name, Weight, Style, Data)
-            if not isfile(Data.Id) then 
-                writefile(Data.Id, game:HttpGet(Data.Url))
+            local FontPath = `{Library.Folders.Fonts}/{Data.Id}.ttf`
+
+            if not isfile(FontPath) then 
+                writefile(FontPath, game:HttpGet(Data.Url))
             end
 
-            local Data = {
+            local FontData = {
                 name = Name,
                 faces = {
                     {
                         name = Name,
                         weight = Weight,
                         style = Style,
-                        assetId = getcustomasset(Data.Id)
+                        assetId = getcustomasset(FontPath)
                     }
                 }
             }
 
-            writefile(`{Library.Folders.Fonts}/{Name}.font`, HttpService:JSONEncode(Data))
+            writefile(`{Library.Folders.Fonts}/{Name}.font`, HttpService:JSONEncode(FontData))
             return Font.new(getcustomasset(`{Library.Folders.Fonts}/{Name}.font`))
         end
 
