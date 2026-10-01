@@ -120,6 +120,7 @@ local Library do
     Library.__index = Library
     Library.Sections.__index = Library.Sections
     Library.Pages.__index = Library.Pages
+    Library.Folders.Autoload = Library.Folders.Directory .. "/autoload.txt"
 
     local Keys = {
         ["Unknown"]           = "Unknown",
@@ -903,6 +904,33 @@ local Library do
         end
 
         Element:Refresh(ReturnList)
+    end
+
+    Library.SetAutoload = function(self, ConfigName)
+        writefile(Library.Folders.Autoload, ConfigName .. ".json")
+    end
+
+    Library.ClearAutoload = function(self)
+        if isfile(Library.Folders.Autoload) then
+            delfile(Library.Folders.Autoload)
+        end
+    end
+
+    Library.CheckAutoload = function(self)
+        if isfile(Library.Folders.Autoload) then
+            local ConfigName = readfile(Library.Folders.Autoload)
+            local FilePath = Library.Folders.Configs .. "/" .. ConfigName
+            
+            if isfile(FilePath) then
+                local Content = readfile(FilePath)
+                local Success, Error = Library:LoadConfig(Content)
+                if Success then
+                    Library:Notification("Autoloaded " .. ConfigName, 3)
+                else
+                    warn("Failed to autoload config:", Error)
+                end
+            end
+        end
     end
 
     Library.ChangeItemTheme = function(self, Item, Properties)
@@ -5195,6 +5223,10 @@ local Library do
                             delfile(Library.Folders.Configs .. "/" .. ConfigSelected .. ".json")
                             Library:RefreshConfigsList(ConfigsSearchbox)
                             Library:Notification("Deleted config " .. ConfigSelected .. ".json", 5, FromRGB(255, 0, 0))
+
+                            if isfile(Library.Folders.Autoload) and readfile(Library.Folders.Autoload) == ConfigSelected then
+                                delfile(Library.Folders.Autoload)
+                            end
                         end
                     end
                 })
@@ -5227,6 +5259,26 @@ local Library do
                     Name = "Refresh",
                     Callback = function()
                         Library:RefreshConfigsList(ConfigsSearchbox)
+                    end
+                })
+
+                ConfigsSection:Button({
+                    Name = "Set Autoload",
+                    Callback = function()
+                        if ConfigSelected ~= nil then
+                            writefile(Library.Folders.Autoload, ConfigSelected)
+                            Library:Notification("Set " .. ConfigSelected .. " as autoload", 5, FromRGB(0, 255, 0))
+                        end
+                    end
+                })
+
+                ConfigsSection:Button({
+                    Name = "Clear Autoload",
+                    Callback = function()
+                        if isfile(Library.Folders.Autoload) then
+                            delfile(Library.Folders.Autoload)
+                            Library:Notification("Cleared autoload configuration", 5, FromRGB(255, 170, 0))
+                        end
                     end
                 })
 
