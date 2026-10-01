@@ -120,7 +120,6 @@ local Library do
     Library.__index = Library
     Library.Sections.__index = Library.Sections
     Library.Pages.__index = Library.Pages
-    Library.Folders.Autoload = Library.Folders.Directory .. "/autoload.txt"
 
     local Keys = {
         ["Unknown"]           = "Unknown",
@@ -210,6 +209,12 @@ local Library do
         if not isfolder(Value) then
             makefolder(Value)
         end
+    end
+
+    Library.AutoloadFile = Library.Folders.Directory .. "/autoload.txt"
+
+    if isfolder(Library.AutoloadFile) then
+        delfile(Library.AutoloadFile)
     end
 
     -- Images
@@ -917,17 +922,16 @@ local Library do
     end
 
     Library.CheckAutoload = function(self)
-        if isfile(Library.Folders.Autoload) then
-            local ConfigName = readfile(Library.Folders.Autoload)
-            local FilePath = Library.Folders.Configs .. "/" .. ConfigName
+        if isfile(Library.AutoloadFile) then
+            local ConfigName = readfile(Library.AutoloadFile)
+            local FilePath = Library.Folders.Configs .. "/" .. ConfigName .. ".json"
             
             if isfile(FilePath) then
-                local Content = readfile(FilePath)
-                local Success, Error = Library:LoadConfig(Content)
+                local Success, Result = Library:LoadConfig(readfile(FilePath))
                 if Success then
-                    Library:Notification("Autoloaded " .. ConfigName, 3)
+                    Library:Notification("Autoloaded " .. ConfigName .. ".json", 5, FromRGB(0, 255, 0))
                 else
-                    warn("Failed to autoload config:", Error)
+                    Library:Notification("Failed to autoload " .. ConfigName .. ".json", 5, FromRGB(255, 0, 0))
                 end
             end
         end
@@ -5266,8 +5270,12 @@ local Library do
                     Name = "Set Autoload",
                     Callback = function()
                         if ConfigSelected ~= nil then
-                            writefile(Library.Folders.Autoload, ConfigSelected)
-                            Library:Notification("Set " .. ConfigSelected .. " as autoload", 5, FromRGB(0, 255, 0))
+                            local TargetConfig = type(ConfigSelected) == "table" and (ConfigSelected[1] or ConfigSelected.Name) or ConfigSelected
+                            
+                            if type(TargetConfig) == "string" and TargetConfig ~= "" then
+                                writefile(Library.AutoloadFile, TargetConfig)
+                                Library:Notification("Set " .. TargetConfig .. " as autoload", 5, FromRGB(0, 255, 0))
+                            end
                         end
                     end
                 })
@@ -5275,8 +5283,8 @@ local Library do
                 ConfigsSection:Button({
                     Name = "Clear Autoload",
                     Callback = function()
-                        if isfile(Library.Folders.Autoload) then
-                            delfile(Library.Folders.Autoload)
+                        if isfile(Library.AutoloadFile) then
+                            delfile(Library.AutoloadFile)
                             Library:Notification("Cleared autoload configuration", 5, FromRGB(255, 170, 0))
                         end
                     end
